@@ -27,7 +27,7 @@ fi
 source "$VENV_DIR/bin/activate"
 echo "Python: $(which python) — $(python --version)"
 
-pip install --upgrade pip --quiet
+pip install --upgrade pip ninja --quiet
 
 # ---------------------------------------------------------------------------
 # PyTorch — adjust the CUDA version to match the HPC cluster.
