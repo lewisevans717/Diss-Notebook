@@ -14,9 +14,9 @@
 # ---------------------------------------------------------------------------
 # Configuration — edit these before submitting
 # ---------------------------------------------------------------------------
-PROJECT_DIR="$HOME/Diss-Notebook"
-VENV_DIR="$PROJECT_DIR/venv"
-OUTPUT_FILE="$PROJECT_DIR/results_imagenet_$SLURM_JOB_ID.xlsx"
+PROJECT_DIR="$HOME/Diss-Notebook/HPC"
+VENV_DIR="$HOME/Diss-Notebook/venv"
+OUTPUT_FILE="$HOME/Diss-Notebook/results_imagenet_$SLURM_JOB_ID.xlsx"
 
 # Set MAX_BATCHES to a small number (e.g. "50") for a dry run to check timing
 # and GPU memory before committing to the full 50,000-image validation set.
@@ -26,8 +26,8 @@ MAX_BATCHES=""
 # ImageNet is pre-installed on the UoN HPC cluster at this path.
 IMAGENET_DIR="/data/shared/imagenet"
 
-# Point PyTorch's model cache at the shared directory to avoid re-downloading weights.
-export TORCH_HOME="/data/shared/torch"
+# PyTorch model cache (CompressAI weights etc.)
+export TORCH_HOME="$HOME/.cache/torch"
 # ---------------------------------------------------------------------------
 
 set -euo pipefail
