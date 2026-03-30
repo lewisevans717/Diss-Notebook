@@ -885,11 +885,11 @@ def parse_args():
     )
     p.add_argument(
         "--imagenet-dir",
-        default=os.path.expanduser("~/data/shared/imagenet"),
+        default="/data/shared/imagenet",
         dest="imagenet_dir",
         help=(
             "Path to ImageNet root directory containing a 'val/' subfolder "
-            "(ImageFolder layout).  Default: ~/data/shared/imagenet"
+            "(ImageFolder layout).  Default: /data/shared/imagenet"
         ),
     )
     p.add_argument(

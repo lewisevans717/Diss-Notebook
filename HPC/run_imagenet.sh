@@ -2,6 +2,7 @@
 #SBATCH --job-name=imagenet_pipeline
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
+#SBATCH -p cs
 #SBATCH -G 1
 #SBATCH --mem=32g
 #SBATCH -c 4
@@ -23,7 +24,10 @@ OUTPUT_FILE="$PROJECT_DIR/results_imagenet_$SLURM_JOB_ID.xlsx"
 MAX_BATCHES=""
 
 # ImageNet is pre-installed on the UoN HPC cluster at this path.
-IMAGENET_DIR="$HOME/data/shared/imagenet"
+IMAGENET_DIR="/data/shared/imagenet"
+
+# Point PyTorch's model cache at the shared directory to avoid re-downloading weights.
+export TORCH_HOME="/data/shared/torch"
 # ---------------------------------------------------------------------------
 
 set -euo pipefail

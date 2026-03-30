@@ -19,7 +19,7 @@ mkdir -p "$PROJECT_DIR/logs"
 # Create virtual environment
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating virtual environment..."
-    python3 -m venv "$VENV_DIR"
+    python3.13 -m venv "$VENV_DIR"
 else
     echo "Virtual environment already exists — skipping creation."
 fi
