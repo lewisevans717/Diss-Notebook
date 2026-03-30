@@ -1,0 +1,108 @@
+Connecting
+All connections to the cluster will fundamentally be handled via SSH; which, if you aren't familiar with it, is a means of acquiring a shell, or text-based interface, on a remote machine. The cluster will always be a collection of remote machine to its users. 
+In its simplest form, this will be the running of one of the following commands in the terminal of your choice, replacing user of course with your username:
+[user@local ~]$ ssh user@jarvis.cs.nott.ac.uk
+[user@local ~]$ ssh user@homer.cs.nott.ac.uk
+[user@local ~]$ ssh user@virgil.cs.nott.ac.uk
+These can be seen as equivalent, all connecting to one of the cluster's login nodes from which jobs can be submitted, more on how later. The differences between these nodes are minimal, technical, and have no impact on their use, so feel free to just pick a favourite, with some concept of being able to change to another if one has issues. Once you have access, SSH keys and known hosts can even be installed to streamline various workflows, something we will detail further elsewhere.
+Network Access
+The above commands will only work if you are within the university network, otherwise they won't resolve correctly, for guidance on accessing the cluster resources from outside of the building, please see the pages on Remote Access.
+
+Remote Access Documentation
+
+Getting Started
+
+Fundamentally, using the cluster is just using a remote host to get experiments done. We aim, as far as possible, to make the differences involved in using the cluster frictionless where possible with much of it ‘just happening’, but the specifics of what is occurring as expounded here for your understanding. 
+Storage
+The cluster does not handle storage in the same way as your laptop or desktop will, instead the storage available to the cluster is centralised, more akin to the UG Linux servers, or other University provided storage.
+ 
+Two specific parts of the file system you are presented with upon connecting to the cluster will be of interest:
+/home/
+/data/
+These will be the two places that you will be adding and editing files, and most likely the many places you will be using files from. These are not hosted on the node you have connected to, but instead on wolverine and cavillrine respectively. The underlying storage will be mounted in this way by every login node, and every compute node, meaning that you can rely on paths to these working in every context that scripts and code you write will be run.
+
+Speaking of code, this, along with any model checkpoints, documentation, results, etc. that you produce will be stored under /home/, typically this will go under /home/<your-username> unless you're working on a shared project, in which case you will get a specific project folder to use.
+
+By contrast the use of /data/, again primarily /data/<your-username> is for storing datasets. Here there is a proviso that common datasets might be available in /data/shared/, however this is due to be overhauled. 
+
+Neither of these storage servers are backed up, though they are pools of redundant storage, so are robust against drive failure, we do not have means to back up the hundreds of terabytes stored on them. As such you should keep this in mind and back up anything that you can't easily replicate, i.e. code, final checkpoints, while having a mind to what you can, downloadable datasets, Python environments, etc.
+
+Python Environments
+Python, is available on all nodes with versions 3.9, 3.11, 3.12, and 3.13, all accessible by using python3.9, python3.11, python3.12, and python3.13 respectively. A naked invocation, i.e. python or python3 will just get you python3.9 the system version.
+
+As these are shared between all users on the cluster we obviously do not want everyone making changes and installations directly to these, so we encourage users to use virtual environments. To this end pip will resist you making changes to this shared Python environments. There are two primary options for creating a virtual environment for your use which we will offer introductions to below.
+
+venv
+The Python native solution as well as the recommendation of PyTorch, and ourselves. It helps prevent some forms of duplication, and can get you up and running with a PyTorch environment very quickly. To set up a virtual environment this way, all you need to do is run the following command:
+[user@login-node ~]$ python3.X -m venv /path/to/new/virtual/environment
+For example Alexis might run:
+[psyajd@jarvis ~]$ python3.13 -m venv ~/projects/object_segmentation/.obj_seg_venv
+Once done you will need to activate the environment using the appropriate script. See the full venv documentation for more details, (especially if not using Bash), but following the example above, Alexis would run (assuming they were in the ~/projects/object_segmentation/ directory:
+[psyajd@jarvis ~]$ source .obj_seg_venv/bin/activate
+And see their prompt change to:
+(.obj_seg_venv)[psyajd@jarvis ~]$
+The changing of a prompt like this is a useful indicator that all further interactions with python and pip will be tied to the environment, and a descriptive name for your virtual environment is always recommended.
+
+From here on out you can install whatever Python packages you want, e.g. Torch, safe in the knowledge that you are only modifying .obj_seg_venv and not the shared environment.
+
+conda
+Conda, a spin out from the broader Anaconda platform, is a package and environment manager that can handle producing environments with specific python versions, and some, but not all, of the package installation. You may have heard of Conda as the way to approach package management, or even seen PyTorch themselves recommend it in the past, however there are some huge caveats to that now. Fundamentally Conda can be a much more powerful tool than the combination of venv and pip but much heavier and more involved because of that.
+
+Setting up Conda will begin with downloading and running the installer, which is where the first choice has to be made. Anaconda itself cannot be installed on the servers so the minimised installs of Miniconda, a tool set up to work with Anaconda's official repository, and Miniforge, a community tool set up to work with the conda-forge channel, are available. Due to the slowness of the Anaconda Repository leading to many projects leaving it behind in favour of conda-forge we will recommend using Miniforge which is downloaded and installed as follows (Miniconda instructions are available in the official Miniconda documentation):
+
+[user@login-node ~]$ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+[user@login-node ~]$ bash Miniforge3-Linux-x86_64.sh
+Once this is done, you will have conda available to you and be able to set up an environment. The python version can be changed later, but it is easiest to start from the intended one, for example:
+
+[psyajd@jarvis ~]$ conda create --name obj_seg_env python=3.13
+And then activate that environment:
+[psyajd@jarvis ~]$ conda activate obj_seg_env
+Resulting in a Conda prompt appearing for:
+(obj_seg_venv)[psyajd@jarvis ~]$
+From here we can now install packages using conda and then pip to install the required software, e.g. Torch. The ordering here is important, as if you need to use both, the use of pip really messes with conda and any further changes to conda installed packages are recommended to be done by duplicating an environment before the pip installs, making the changes, and repeating the pip installs. 
+
+However, the general principle still applies that the environment is an isolated one where changes will not be made to any shared environments. Due to the incredibly mixed landscape of installation options between the Anaconda Repository, the conda-forge and other community, or third party channels, and PyPI, the package index which pip works from, we won't be documenting all the specific options for installation going forward, but will just assume that a virtual python environment is being used and will suggest pip-based installations.
+
+Additionally, a Conda environment does not qualify as a virtual environment for the purposes of pip and if you wish to use Conda to manage your environments then you may need to add the following line to your .bash_profile file:
+
+export PIP_REQUIRE_VIRTUALENV=false
+Code
+Once an environment is set up then code can be written or imported. All of the usual methods for delivering your code can work here, such as git or scp, or various GUIs and front ends for these. Additionally tools like VSCode's Remote Explorer for ssh targets can be very useful to provide an experience of editing code almost as though it is local.
+
+The specifics of how to write code for experiments, best practices, and the quirks of writing code to be run in the specific environment of the cluster are too involved as subjects to be covered here; however it is often sufficient to simply ensure that your code runs, in the environment you've created, without needing user interaction, on the resources available to it.
+
+Slurm
+And so we come to how does the cluster make resources available to users, with the simple answer being Slurm. Whenever you want to run something resource intensive on the cluster you will so via Slurm, specifically via one of srun and sbatch commands that submit jobs to the compute nodes on the cluster.
+
+These commands allow us to run either an interactive, srun, or non-interactive, sbatch, command. Typically usage will lean towards the latter, as it allows us to set multiple jobs running and leave them running for hours or days without supervision, which is one of the primary strengths of running on a cluster than runs 24/7. Functionally both use the same arguments to request resources. 
+
+The other key difference between the two is how we will typically use them. For srun we have to specify everything at the command line, i.e.:
+
+[user@login-node ~]$ srun <arguments> <command>
+Or to give a concrete example, remembering that the environment is import:
+(obj_seg_venv)[psyajd@jarvis ~]$ srun -c4 --mem=16G -G1 -p general python quick_predictions.py
+This will run the task, printing the output to the console as it goes and we can watch the progress live. For full context on the commands check the linked documentation pages, but this example is requesting 4 CPU cores, 16GB of memory, and 1 GPU, while asking to run on the ‘general’ partition, more on that later. However if we wanted to run the same thing using sbatch because we thought it would take longer, we might look at using:
+(obj_seg_venv)[psyajd@jarvis ~]$ sbatch quick_predictions.sh
+Crucially this isn't just invoking our Python file, but instead a shell script, which would likely look like this:
+#!/bin/bash 
+
+#SBATCH -J "Quick Predictions" 
+#SBATCH -c2 --mem=4G -G1
+#SBATCH -p general
+
+python quick_predictions.py
+We see the same resource and partition requests have now been moved into the script, along with setting a job name, making the repeated running of similar requests easier, in fact the is a relatively common pattern for an sbatch script:
+#!/bin/bash 
+
+#SBATCH <arguments to slurm>
+
+python <script> $@
+The use of $@ here will pass all of the arguments given to the script in the sbatch command, i.e.:
+[user@login-node ~]$ sbatch example.sh <arguments>
+Through to the python script, allowing you to use the same sbatch script to run variations of the same underlying code. Additionally when we run our experiments using sbatch rather than srun we don't lose the output, it is simply redirected to a file, slurm-<job-id>.out by default. 
+
+Once a job is submitted, then we can use squeue or to get a cleaner output squeue --me to just see our jobs. This will tell us various details like if it is pending resources, ST column showing PD, or if it is running, showing R instead; how long it has run for TIME column; which node it is running on, NODELIST; and if it is a GPU requesting job, we can see the GPU compute load and memory usage in the COMMENT field.
+
+We can also, if there is need, use scancel to cancel a job, either by giving the job id, which is provided when we submit the job, or from squeue, or by simply using scancel --me to cancel all of the jobs that we as a user are running.
+
+Finally, it is worth noting that though this doesn't cover the details of finding the specific resources that a job requires, monitoring them, and viewing the available partitions, guides on those are on the way. For now, we can recommend the command qos $USER to check which account you are registered under if you do not know, and looking at Account and QoS Documentation for information on the partitions that are then available to you. 
