@@ -6,7 +6,7 @@
 #SBATCH -G 1
 #SBATCH --mem=32g
 #SBATCH -c 4
-#SBATCH -t 1-00:00:00
+#SBATCH -t 4-00:00:00
 # Optional: uncomment and fill in to receive email notifications
 # #SBATCH --mail-type=END,FAIL
 # #SBATCH --mail-user=YOUR_EMAIL@nottingham.ac.uk
@@ -50,18 +50,19 @@ if torch.cuda.is_available():
 PYEOF
 
 # Build the command
-CMD="python $PROJECT_DIR/run_pipeline.py --output $OUTPUT_FILE"
-
-if [ -n "$MAX_BATCHES" ]; then
-    CMD="$CMD --max-batches $MAX_BATCHES"
-fi
-
 if [ ! -d "$IMAGENET_DIR/val" ]; then
     echo "ERROR: ImageNet val directory not found at $IMAGENET_DIR/val"
     exit 1
 fi
 
-CMD="$CMD --imagenet-dir $IMAGENET_DIR"
+CMD="python $PROJECT_DIR/run_pipeline.py --output $OUTPUT_FILE --imagenet-dir $IMAGENET_DIR"
+
+if [ -n "$MAX_BATCHES" ]; then
+    CMD="$CMD --max-batches $MAX_BATCHES"
+fi
+
+# Pass any extra arguments (e.g. --model resnet18_imagenet) through to the script
+CMD="$CMD $@"
 
 echo "Running: $CMD"
 eval "$CMD"

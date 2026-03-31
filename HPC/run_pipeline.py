@@ -911,6 +911,13 @@ def parse_args():
         dest="batch_size",
         help="DataLoader batch size (default: 32)",
     )
+    p.add_argument(
+        "--model",
+        default=None,
+        dest="model",
+        choices=list(MODEL_REGISTRY.keys()),
+        help="Run a single model only (default: run all ImageNet models)",
+    )
     return p.parse_args()
 
 
@@ -937,7 +944,7 @@ def main():
     attack_keys = ["fgsm", "pgd", "apgd"]
     qualities = [25, 50, 75]
     epsilons = [8 / 255]
-    model_names = ["resnet18_imagenet", "resnet50_imagenet"]
+    model_names = [args.model] if args.model else ["resnet18_imagenet", "resnet50_imagenet"]
 
     # 5. Build and run
     pipeline_specs = build_pipeline_grid(
