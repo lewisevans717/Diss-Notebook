@@ -171,6 +171,12 @@ def load_resnet50_imagenet() -> nn.Module:
     return torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
 
 
+def load_vit_base16_imagenet() -> nn.Module:
+    from torchvision.models import vit_b_16, ViT_B_16_Weights
+    weights = ViT_B_16_Weights.DEFAULT
+    return vit_b_16(weights=weights)
+
+
 MODEL_REGISTRY: Dict[str, ModelSpec] = {
     "resnet18_imagenet": ModelSpec(
         name="resnet18_imagenet",
@@ -182,6 +188,13 @@ MODEL_REGISTRY: Dict[str, ModelSpec] = {
     "resnet50_imagenet": ModelSpec(
         name="resnet50_imagenet",
         loader=load_resnet50_imagenet,
+        num_classes=1000,
+        input_size=224,
+        dataset="imagenet",
+    ),
+    "vit_base16_imagenet": ModelSpec(
+        name="vit_base16_imagenet",
+        loader=load_vit_base16_imagenet,
         num_classes=1000,
         input_size=224,
         dataset="imagenet",
