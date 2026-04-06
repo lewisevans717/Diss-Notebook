@@ -846,8 +846,9 @@ def run_pipeline_grid(
     device,
     max_batches=None,
     output_path: Optional[str] = None,
+    prior_records: Optional[List[dict]] = None,
 ) -> pd.DataFrame:
-    records = []
+    records = list(prior_records) if prior_records else []
     for model_name in model_names:
         print(f"\n----- Model: {model_name} -----", flush=True)
         model = build_model(model_name, device)
@@ -937,6 +938,13 @@ def parse_args():
         choices=list(MODEL_REGISTRY.keys()),
         help="Run a single model only (default: run all ImageNet models)",
     )
+    p.add_argument(
+        "--skip-completed",
+        default=None,
+        dest="skip_completed",
+        help="Path to an existing results .xlsx file. Pipelines already present "
+             "in that file (matched by model + pipeline name) will be skipped.",
+    )
     return p.parse_args()
 
 
@@ -974,6 +982,23 @@ def main():
     )
     print(f"Total pipelines: {len(pipeline_specs)}", flush=True)
 
+    # 6. Skip already-completed pipelines if requested
+    prior_records = []
+    if args.skip_completed:
+        prior_df = pd.read_excel(args.skip_completed)
+        completed = set(zip(prior_df["model"], prior_df["pipeline"]))
+        before = len(pipeline_specs)
+        pipeline_specs = [
+            s for s in pipeline_specs
+            if not any((m, s.name) in completed for m in model_names)
+        ]
+        print(
+            f"Skipping {before - len(pipeline_specs)} already-completed pipelines "
+            f"(loaded from {args.skip_completed}); {len(pipeline_specs)} remaining.",
+            flush=True,
+        )
+        prior_records = prior_df.to_dict("records")
+
     results_df = run_pipeline_grid(
         model_names=model_names,
         pipeline_specs=pipeline_specs,
@@ -981,6 +1006,7 @@ def main():
         device=device,
         max_batches=args.max_batches,
         output_path=args.output,
+        prior_records=prior_records,
     )
 
     print(f"\nResults saved to: {args.output}", flush=True)
