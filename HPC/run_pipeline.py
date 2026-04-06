@@ -845,6 +845,7 @@ def run_pipeline_grid(
     dataloader,
     device,
     max_batches=None,
+    output_path: Optional[str] = None,
 ) -> pd.DataFrame:
     records = []
     for model_name in model_names:
@@ -885,6 +886,11 @@ def run_pipeline_grid(
                     "mae_mean": res["mae_mean"],
                 }
             )
+            # Save incrementally after every pipeline in case of job cancellation
+            if output_path is not None:
+                pd.DataFrame.from_records(records).to_excel(
+                    output_path, sheet_name="Sheet1", index=False
+                )
     return pd.DataFrame.from_records(records)
 
 
@@ -974,10 +980,9 @@ def main():
         dataloader=base_test_loader,
         device=device,
         max_batches=args.max_batches,
+        output_path=args.output,
     )
 
-    # 6. Save
-    results_df.to_excel(args.output, sheet_name="Sheet1", index=False)
     print(f"\nResults saved to: {args.output}", flush=True)
 
 
